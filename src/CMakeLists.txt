@@ -1,0 +1,1 @@
+add_library(Lab1 STATIC BufferManager.cpp DataStorageManager.cpp)
