@@ -19,9 +19,14 @@ class TestDriver {
     DSM.OpenFile("data.dbf");
 
     // Materialize database file
+    auto &BM = BufferManager::GetSingleton();
     for (int i = 0; i < 50000; i++) {
-      BufferManager::GetSingleton().FixNewPage();
+      auto pair = BM.FixNewPage();
+      BM.UnfixPage(pair.first);
     }
+
+    DSM.CloseFile();
+    DSM.OpenFile("data.dbf");
 
     // Open trace file
     trace.exceptions(ifstream::failbit | ifstream::badbit);
@@ -43,6 +48,7 @@ class TestDriver {
           break;
         case 1:  // write page
           BM.FixPage(pageId, 0);
+          BM.SetDirty(pageId);
           break;
         default:
           throw runtime_error("Invalid action index");

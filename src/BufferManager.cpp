@@ -6,24 +6,31 @@
 #include <iostream>
 
 void *BufferManager::FixPage(uint32_t pageId, uint32_t protectFlag) {
+  std::cerr << "[FixPage] : " << pageId << std::endl;
   auto &DSM = DataStorageManager::GetSingleton();
   if (ptof.find(pageId) == ptof.end()) {
     // pageId没有加载到缓冲区
     // 分配新的frame用于存放pageId所对应的页内容
     auto frameId = SelectVictim();
+    ptof.erase(control[frameId].pageId);
     DSM.ReadPage(pageId, buffer[frameId]);
     control[frameId].Reset();
+    control[frameId].pageId = pageId;
     ptof[pageId] = frameId;
+    std::cerr << "[FixPage] : Miss" << std::endl;
+  } else {
+    std::cerr << "[FixPage] : Hit" << std::endl;
   }
   // pageId已经加载到缓冲区
   control[ptof[pageId]].count += 1;
   return buffer[ptof[pageId]].field;
 }
 
-void *BufferManager::FixNewPage() {
+std::pair<uint32_t, void *> BufferManager::FixNewPage() {
   auto &DSM = DataStorageManager::GetSingleton();
   uint32_t pageId = DSM.CreatePage();
-  return FixPage(pageId, 0);
+  std::cerr << "[FixNewPage] : " << pageId << std::endl;
+  return {pageId, FixPage(pageId, 0)};
 }
 
 void BufferManager::UnfixPage(uint32_t pageId) {
@@ -48,11 +55,13 @@ uint32_t BufferManager::SelectVictim() {
 
   auto frameId = victims.front();
   victims.pop_front();
+  std::cerr << "[SelectVicitim] : " << frameId << std::endl;
 
   return frameId;
 }
 
 void BufferManager::SetDirty(uint32_t pageId) {
+  std::cerr << "[SetDirty] : " << pageId << std::endl;
   auto frameId = ptof[pageId];
   control[frameId].dirty = true;
 }

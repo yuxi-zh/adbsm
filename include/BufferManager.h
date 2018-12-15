@@ -19,6 +19,9 @@ class BufferManager {
  private:
   struct CtrlBlk {
     //
+    uint32_t pageId;
+
+    //
     uint32_t count;
 
     //
@@ -53,7 +56,7 @@ class BufferManager {
   /// <summary>
   /// Allocate a new empty page and load it into buffer.
   /// </summary>
-  void *FixNewPage();
+  std::pair<uint32_t, void *> FixNewPage();
 
   /// <summary>
   /// Decrement the fix count on frame of specified page.
