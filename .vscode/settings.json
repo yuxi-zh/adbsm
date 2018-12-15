@@ -1,5 +1,8 @@
 {
   "files.associations": {
-    "xtree": "cpp"
-  }
+    "xtree": "cpp",
+    "fstream": "cpp"
+  },
+  "C_Cpp.default.configurationProvider": "vector-of-bool.cmake-tools",
+  "cmake.configureOnOpen": false
 }

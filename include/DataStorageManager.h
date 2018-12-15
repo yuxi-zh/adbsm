@@ -59,6 +59,11 @@ class DataStorageManager {
   /// </summary>
   static DataStorageManager &GetSingleton();
 
+  /// <summary>
+  /// Create a empty database file in specified path
+  /// </summary>
+  static void CreateFile(std::string filePath);
+
  private:
   /// <summary>
   /// Translate the pageid to offset in db file

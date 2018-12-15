@@ -14,6 +14,10 @@ class TestDriver {
   /// and materialize it with required 50000 pages
   /// </summary>
   void InitTest() {
+    auto &DSM = DataStorageManager::GetSingleton();
+    DSM.CreateFile("data.dbf");
+    DSM.OpenFile("data.dbf");
+
     // Materialize database file
     for (int i = 0; i < 50000; i++) {
       BufferManager::GetSingleton().FixNewPage();
@@ -28,21 +32,22 @@ class TestDriver {
   /// Call interface funtion according to given trace file
   /// </summary>
   void RunTest() {
+    auto &BM = BufferManager::GetSingleton();
     while (!trace.eof()) {
       uint32_t action, pageId;
       char seperator;
       trace >> action >> seperator >> pageId;
       switch (action) {
         case 0:  // read page
-          BufferManager::GetSingleton().FixPage(pageId, 0);
+          BM.FixPage(pageId, 0);
           break;
         case 1:  // write page
-          BufferManager::GetSingleton().FixPage(pageId, 0);
+          BM.FixPage(pageId, 0);
           break;
         default:
           throw runtime_error("Invalid action index");
       }
-      BufferManager::GetSingleton().UnfixPage(pageId);
+      BM.UnfixPage(pageId);
     }
   }
 
@@ -64,10 +69,15 @@ class TestDriver {
 };
 
 int main(int argc, char const *argv[]) {
-  TestDriver driver;
-  driver.InitTest();
-  driver.RunTest();
-  driver.ReportMertics();
-  driver.UninitTest();
+  try {
+    TestDriver driver;
+    driver.InitTest();
+    driver.RunTest();
+    driver.ReportMertics();
+    driver.UninitTest();
+  } catch (const std::exception &e) {
+    std::cerr << e.what() << '\n';
+  }
+
   return 0;
 }

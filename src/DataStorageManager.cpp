@@ -1,12 +1,22 @@
 #include "DataStorageManager.h"
 
 #include <algorithm>
+#include <experimental/filesystem>
 
-DataStorageManager::DataStorageManager() {}
+namespace fs = std::experimental::filesystem;
+
+DataStorageManager::DataStorageManager() : counter(0) {}
 
 DataStorageManager &DataStorageManager::GetSingleton() {
   static DataStorageManager DSM;
   return DSM;
+}
+
+void DataStorageManager::CreateFile(std::string filePath) {
+  std::fstream file(filePath);
+  file.seekp(2 * PAGE_SIZE - 1);
+  file.write("", 1);
+  file.close();
 }
 
 void DataStorageManager::OpenFile(std::string filePath) {
@@ -44,7 +54,7 @@ bool DataStorageManager::IsUsed(uint32_t pageId) {
 
 uint32_t DataStorageManager::CreatePage() {
   for (int i = 0, n = 2 * PAGE_SIZE; i != n; ++i) {
-    if (usemap[i] == 0xff) {
+    if (usemap[i] != 0xff) {
       for (int j = 0, m = 8; j != m; ++j) {
         if ((usemap[j] & (1 << j)) == 0) {
           uint32_t pageId = i * 8 + j;
